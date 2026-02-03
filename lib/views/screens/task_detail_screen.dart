@@ -1,165 +1,138 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../../models/task_model.dart';
-class TaskDetailScreen extends StatefulWidget {
-  final String taskId;
+import '../../view_models/task_view_model.dart';
 
-  const TaskDetailScreen({super.key, required this.taskId});
+class TaskDetailScreen extends StatelessWidget {
+  final Task task;
 
-  @override
-  State<TaskDetailScreen> createState() => _TaskDetailScreenState();
-}
+  const TaskDetailScreen({super.key, required this.task});
 
-class _TaskDetailScreenState extends State<TaskDetailScreen> {
-  Task? task;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchTaskDetail();
-  }
-
-  Future<void> fetchTaskDetail() async {
-    final url = Uri.parse('https://amock.io/api/researchUTH/task/${widget.taskId}');
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
-
-        final taskData = decoded['data'];
-
-        setState(() {
-          task = Task.fromJson(taskData);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load detail');
-      }
-    } catch (e) {
-      setState(() => isLoading = false);
-      debugPrint("Error: $e");
-    }
-  }
-
-  Future<void> deleteTask() async {
-    final url = Uri.parse('https://amock.io/api/researchUTH/task/${widget.taskId}');
+  void _confirmDelete(BuildContext context) async {
     bool confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Xác nhận xóa"),
         content: const Text("Bạn muốn xóa task này?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Xóa", style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Hủy"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Xóa", style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     ) ?? false;
 
-    if (confirm) {
-      try {
-        final response = await http.delete(url);
-        if (response.statusCode == 200 || response.statusCode == 204) {
-          debugPrint("Đã xoá task thành công!");
-          if (mounted) Navigator.pop(context, true);
-        }
-      } catch (e) {
-        if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi: $e")));
-      }
+    if (confirm && context.mounted) {
+      await Provider.of<TaskViewModel>(context, listen: false).deleteTask(task.id);
+      if (context.mounted) Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    String displayDate = task.dueDate.length >= 10
+        ? task.dueDate.substring(0, 10)
+        : task.dueDate;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Detail"),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: deleteTask,
+            onPressed: () => _confirmDelete(context),
           )
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : task == null
-          ? const Center(child: Text("Lỗi tải dữ liệu"))
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Ảnh mô tả (nếu có)
-            if (task!.desImageURL.isNotEmpty)
+            // 1. Ảnh mô tả
+            if (task.desImageURL.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  task!.desImageURL,
+                  task.desImageURL,
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Container(height: 200, color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported)),
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 200,
+                    width: double.infinity,
+                    color: Colors.grey.shade200,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
+                        Text("Cannot load image offline", style: TextStyle(color: Colors.grey))
+                      ],
+                    ),
+                  ),
                 ),
               ),
             const SizedBox(height: 16),
 
             // 2. Title
-            Text(task!.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(task.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
 
             // 3. Description
-            Text(task!.description, style: TextStyle(color: Colors.grey[700], fontSize: 16)),
+            Text(task.description, style: TextStyle(color: Colors.grey[700], fontSize: 16)),
             const SizedBox(height: 16),
 
-            // 4. Info Grid (Category, Status, Priority)
+            // 4. Info Grid
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoBadge(Icons.folder, "Category", task!.category, Colors.blue),
-                _buildInfoBadge(Icons.flag, "Priority", task!.priority, Colors.orange),
-                _buildInfoBadge(Icons.timelapse, "Status", task!.status, Colors.purple),
+                _buildInfoBadge(Icons.folder, "Category", task.category, Colors.blue),
+                _buildInfoBadge(Icons.flag, "Priority", task.priority, Colors.orange),
+                _buildInfoBadge(Icons.timelapse, "Status", task.status, Colors.purple),
               ],
             ),
             const SizedBox(height: 24),
 
-            // 5. Subtasks Section
-            const Text("Subtasks", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ...task!.subtasks.map((sub) => CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                sub.title,
-                style: TextStyle(
-                  decoration: sub.isCompleted ? TextDecoration.lineThrough : null,
-                  color: sub.isCompleted ? Colors.grey : Colors.black,
+            // 5. Subtasks
+            if (task.subtasks.isNotEmpty) ...[
+              const Text("Subtasks", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ...task.subtasks.map((sub) => CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  sub.title,
+                  style: TextStyle(
+                    decoration: sub.isCompleted ? TextDecoration.lineThrough : null,
+                    color: sub.isCompleted ? Colors.grey : Colors.black,
+                  ),
                 ),
-              ),
-              value: sub.isCompleted,
-              onChanged: (val) {
-                // Xử lý update trạng thái subtask ở đây (nếu cần gọi API)
-              },
-              controlAffinity: ListTileControlAffinity.leading,
-            )),
+                value: sub.isCompleted,
+                onChanged: (val) {
 
-            const Divider(height: 32),
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              )),
+              const Divider(height: 32),
+            ],
 
-            // 6. Attachments Section
+            // 6. Attachments
             const Text("Attachments", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            if (task!.attachments.isEmpty)
+            if (task.attachments.isEmpty)
               const Text("No attachments", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
-            ...task!.attachments.map((file) => Card(
+
+            ...task.attachments.map((file) => Card(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
                 leading: const Icon(Icons.attach_file, color: Colors.blue),
                 title: Text(file.fileName),
                 trailing: const Icon(Icons.download_rounded),
                 onTap: () {
-                  // Mở link fileUrl
-                  print("Opening ${file.fileUrl}");
                 },
               ),
             )),
@@ -169,7 +142,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     );
   }
 
-  // Widget con để vẽ các ô thông tin nhỏ
   Widget _buildInfoBadge(IconData icon, String label, String value, Color color) {
     return Column(
       children: [

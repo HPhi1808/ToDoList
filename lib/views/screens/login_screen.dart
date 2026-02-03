@@ -21,14 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (user != null) {
-      // Đăng nhập thành công -> Chuyển sang màn hình Profile
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
-      // Thông báo lỗi
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Đăng nhập thất bại hoặc đã hủy")),
@@ -64,8 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
             const Text("Welcome", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
             const Text("Ready to explore? Log in to get started."),
             const SizedBox(height: 30),
-
-            // Nút đăng nhập Google
             SizedBox(
               width: double.infinity,
               height: 50,

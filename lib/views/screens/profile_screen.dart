@@ -1,4 +1,3 @@
-// profile_screen.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
@@ -12,13 +11,15 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: const Text("Profile", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // Xử lý nút back tùy logic của bạn (về trang Home hoặc thoát)
             Navigator.pop(context);
           },
         ),
@@ -31,23 +32,22 @@ class ProfileScreen extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: 50,
+                backgroundColor: Colors.grey.shade200,
                 backgroundImage: NetworkImage(user.photoURL ?? "https://via.placeholder.com/150"),
               ),
             ),
             const SizedBox(height: 30),
 
-            // Form Fields (Read-only)
+            // Các trường thông tin
             _buildInfoField("Name", user.displayName ?? "No Name"),
             const SizedBox(height: 15),
             _buildInfoField("Email", user.email ?? "No Email"),
             const SizedBox(height: 15),
-
-            // Date of Birth (Mock UI vì Google không cung cấp)
-            _buildInfoField("Date of Birth", "23/05/1995", isDropdown: true),
+            _buildInfoField("Date of Birth", "17/02/2005"),
 
             const SizedBox(height: 50),
 
-            // Nút Logout (Mô phỏng nút Back màu xanh ở cuối ảnh)
+            // Nút Logout
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -62,8 +62,9 @@ class ProfileScreen extends StatelessWidget {
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  elevation: 2,
                 ),
-                child: const Text("Log Out"),
+                child: const Text("Log Out", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -72,25 +73,25 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Widget con để vẽ các ô nhập liệu
-  Widget _buildInfoField(String label, String value, {bool isDropdown = false}) {
+  Widget _buildInfoField(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 5),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        const SizedBox(height: 8),
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           decoration: BoxDecoration(
+            color: Colors.grey.shade50,
             border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(value, style: TextStyle(color: Colors.grey[700])),
-              if (isDropdown) const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-            ],
+          child: Text(
+            value,
+            style: TextStyle(color: Colors.grey[800], fontSize: 16),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

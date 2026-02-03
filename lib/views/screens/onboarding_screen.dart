@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'onboarding_content.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -46,7 +45,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          // Phần nội dung trượt (PageView)
           Expanded(
             child: PageView.builder(
               controller: _controller,
@@ -81,7 +79,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          // Phần Dots Indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -90,7 +87,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          // Phần nút bấm (Back / Next / Get Started)
           Container(
             height: 60,
             margin: const EdgeInsets.all(40),
@@ -111,7 +107,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   style: IconButton.styleFrom(backgroundColor: Colors.white, side: const BorderSide(color: Colors.blue)),
                 ),
 
-                // Nút Next hoặc Get Started
                 ElevatedButton(
                   onPressed: () {
                     if (currentIndex == contents.length - 1) {
@@ -144,7 +139,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // Widget vẽ dấu chấm tròn
   Container buildDot(int index, BuildContext context) {
     return Container(
       height: 10,
