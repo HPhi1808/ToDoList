@@ -1,6 +1,6 @@
-# UTH SmartTasks 📝
+# To Do List 📝
 
-**UTH SmartTasks** là ứng dụng quản lý công việc (To-Do List) hiện đại, được xây dựng bằng **Flutter**. Ứng dụng áp dụng kiến trúc **MVVM**, hỗ trợ **Offline-first** (hoạt động khi không có mạng) và đồng bộ dữ liệu thông minh.
+**To Do List** là ứng dụng quản lý công việc hiện đại, được xây dựng bằng **Flutter**. Ứng dụng áp dụng kiến trúc **MVVM**, hỗ trợ **Offline-first** (hoạt động khi không có mạng) và đồng bộ dữ liệu thông minh.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.0+-blue?logo=dart)
