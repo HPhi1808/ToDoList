@@ -46,3 +46,53 @@ lib/
 │   ├── screens/           # Các màn hình chính (Home, Detail, Create...)
 │   └── widgets/           # Các widget tái sử dụng (TaskItem...)
 └── main.dart              # Khởi chạy ứng dụng & Cấu hình Provider
+```
+
+## 🚀 Cài đặt & Chạy dự án
+**1. Yêu cầu**
+
+Flutter SDK
+
+Android Studio / VS Code
+
+Máy ảo Android hoặc thiết bị thật.
+
+**2. Clone dự án**
+
+    git clone https://github.com/HPhi1808/ToDoList.git
+**3. Cài đặt thư viện**
+
+    flutter pub get
+**4. Cấu hình Firebase (Quan trọng)**
+
+Dự án sử dụng Firebase Auth, bạn cần tự tạo project Firebase của riêng mình:
+
+- Truy cập Firebase Console.
+
+- Tạo project mới.
+
+- Thêm ứng dụng Android với package name: com.example.to_do_list (tên trong AndroidManifest.xml).
+
+- Kích hoạt Authentication -> Google Sign-In.
+
+- Tải file google-services.json và đặt vào thư mục: android/app/google-services.json
+
+**5. Chạy ứng dụng**
+
+    flutter run
+## 🧠 Logic hoạt động (Offline First)
+Khi mở App: SplashScreen kiểm tra FirebaseAuth. Nếu đã đăng nhập -> vào Home. Nếu chưa -> vào Onboarding/Login.
+
+***Tại Home:***
+
+TaskViewModel được gọi.
+
+Nó lấy dữ liệu từ SQLite hiển thị lên UI ngay lập tức (không chờ mạng).
+
+Sau đó, nó gọi API ngầm. Nếu có dữ liệu mới, nó cập nhật vào SQLite và refresh UI.
+
+***Khi Thêm/Xóa:***
+
+Dữ liệu được cập nhật ngay vào SQLite và UI.
+
+Logic đồng bộ lên Server được thực hiện ngầm (hiện tại là Mock API).
